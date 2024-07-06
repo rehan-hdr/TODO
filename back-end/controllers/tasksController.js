@@ -4,16 +4,16 @@ const Task = require('../models/tasksModel');
 
 // @desc get all tasks
 // @route GET /api/tasks/
-// @access public
+// @access private
 
 const getTasks = asyncHandler (async (req, res) => {
-    const tasks = await Task.find();
+    const tasks = await Task.find({userId:req.user.id});
     res.status(200).json(tasks)
 });
 
 // @desc add a task
 // @route POST /api/tasks/
-// @access public
+// @access private
 
 const addTask = asyncHandler (async (req, res) => {
     const {title, description} = req.body;
@@ -25,14 +25,15 @@ const addTask = asyncHandler (async (req, res) => {
     const task = await Task.create({
         title,
         description,
-        completed:false
+        completed:false,
+        userId:req.user.id
     });
     res.status(201).json("Task Created Successfully");
 });
 
 // @desc edit a task
 // @route PUT /api/tasks/:id
-// @access public
+// @access private
 
 const editTask = asyncHandler (async (req, res) => {
 
@@ -40,6 +41,12 @@ const editTask = asyncHandler (async (req, res) => {
     if(!task){
         res.status(404);
         throw new Error("Task not found");
+    }
+
+
+    if(task.userId.toString() !== req.user.id){
+        res.status(403);
+        throw new Error("UNAUTHORIZED")
     }
 
     const updatedTask = await Task.findByIdAndUpdate(
@@ -53,7 +60,7 @@ const editTask = asyncHandler (async (req, res) => {
 
 // @desc delete a task
 // @route DELETE /api/tasks/:id
-// @access public
+// @access private
 
 const deleteTask = asyncHandler (async (req, res) => {
 
@@ -62,6 +69,14 @@ const deleteTask = asyncHandler (async (req, res) => {
         res.status(404);
         throw new Error("Task not found");
     }
+
+    if(task.userId.toString() !== req.user.id){
+        res.status(403);
+        throw new Error("UNAUTHORIZED DELETION")
+    }
+
+
+
     await Task.deleteOne({_id:req.params.id});
 
     res.status(200).json('Deleted Successfully');
