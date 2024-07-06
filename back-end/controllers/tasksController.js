@@ -1,4 +1,5 @@
 const asyncHandler = require("express-async-handler");
+const Task = require('../models/tasksModel');
 
 
 // @desc get all tasks
@@ -6,7 +7,8 @@ const asyncHandler = require("express-async-handler");
 // @access public
 
 const getTasks = asyncHandler (async (req, res) => {
-    res.status(200).json('yea bro');
+    const tasks = await Task.find();
+    res.status(200).json(tasks)
 });
 
 // @desc add a task
@@ -14,7 +16,18 @@ const getTasks = asyncHandler (async (req, res) => {
 // @access public
 
 const addTask = asyncHandler (async (req, res) => {
-    res.status(200).json('ADDING BRUh bro');
+    const {title, description} = req.body;
+
+    if (!title || !description){
+        res.status(400);
+        throw new Error("Both fields are mandatory")
+    }
+    const task = await Task.create({
+        title,
+        description,
+        completed:false
+    });
+    res.status(201).json("Task Created Successfully");
 });
 
 // @desc edit a task
@@ -22,7 +35,20 @@ const addTask = asyncHandler (async (req, res) => {
 // @access public
 
 const editTask = asyncHandler (async (req, res) => {
-    res.status(200).json('EDITING bro');
+
+    const task = await Task.findById(req.params.id);
+    if(!task){
+        res.status(404);
+        throw new Error("Task not found");
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+        req.params.id,
+        req.body
+    )
+
+
+    res.status(200).json('Edited Successfully');
 });
 
 // @desc delete a task
@@ -30,7 +56,15 @@ const editTask = asyncHandler (async (req, res) => {
 // @access public
 
 const deleteTask = asyncHandler (async (req, res) => {
-    res.status(200).json('DELETING VRYGro');
+
+    const task = await Task.findById(req.params.id);
+    if(!task){
+        res.status(404);
+        throw new Error("Task not found");
+    }
+    await Task.deleteOne({_id:req.params.id});
+
+    res.status(200).json('Deleted Successfully');
 });
 
 module.exports = {getTasks, editTask, deleteTask, addTask};
