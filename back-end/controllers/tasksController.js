@@ -11,6 +11,19 @@ const getTasks = asyncHandler (async (req, res) => {
     res.status(200).json(tasks)
 });
 
+//@desc GET this one task
+//@route GET /api/tasks:id
+//@access private
+
+const getTask = asyncHandler(async (req,res) => {
+    const task = await Task.findById(req.params.id);
+    if(!task){
+        res.status(404);
+        throw new Error("TASK NOT FOUND");
+    }
+    res.status(200).json(contact);
+});
+
 // @desc add a task
 // @route POST /api/tasks/
 // @access private
@@ -82,4 +95,4 @@ const deleteTask = asyncHandler (async (req, res) => {
     res.status(200).json('Deleted Successfully');
 });
 
-module.exports = {getTasks, editTask, deleteTask, addTask};
+module.exports = {getTasks, getTask, editTask, deleteTask, addTask};
