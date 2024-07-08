@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { validateUsername } from '../utils/validation';
+import axiosInstance from '../utils/axiosInstance';
 
 const SignUpForm = () => {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     const handleSignUp = async (e) => {
         e.preventDefault();
@@ -21,7 +23,37 @@ const SignUpForm = () => {
         else{
             setError(null)
         }
-    }
+
+        // signup api
+        try {
+            const response = await axiosInstance.post('/api/users/register',{
+                 username: username,
+                 password: password
+            });
+    
+            if (response.data && response.data.error){
+                setError(response.data.message)
+                return
+            }
+            else{
+                navigate('/login');
+            }
+
+            }
+            catch(error){
+                if(error.response && error.response.data && error.response.data.message){
+                    setError(error.response.data.message);
+                }
+                else{
+                    setError('An unexpected error has occured');
+                }
+        }
+
+    };
+    
+
+ 
+        
 
     const handleUsernameChange = (e) => {
         if (!validateUsername(e.target.value)) {

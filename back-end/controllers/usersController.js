@@ -28,11 +28,15 @@ const registerUser = asyncHandler (async (req, res) => {
     });
 
     if (user){
-        res.status(200).json({message:'Registered'});
+        return res.status(200).json({
+            error: false,
+            message:'Registered'});
     }
     else {
-        res.status(400);
-        throw new Error("SOMETHINGW ENT WRONG BRUHH")
+        return res.status(400).json({
+            error:true,
+            message:'CAN NOT SIGN UP'
+        });
     }
 
 });
@@ -63,7 +67,7 @@ const loginUser = asyncHandler (async (req, res) => {
         {expiresIn: '15m'}
     );
 
-    res.status(200).json({accessToken});
+    return res.status(200).json({accessToken, user, error:false, message:'Login Successfull'});
     }
     else {
         res.status(401);
@@ -83,6 +87,7 @@ const loginUser = asyncHandler (async (req, res) => {
 const currentUser = asyncHandler(async (req, res) => {
     res.json(req.user);
 });
+
 
 
 

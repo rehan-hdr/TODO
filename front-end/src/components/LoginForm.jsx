@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { validateUsername } from '../utils/validation';
+import axiosInstance from '../utils/axiosInstance';
 
 const LoginForm = () => {
 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -18,9 +20,30 @@ const LoginForm = () => {
             setError('Invalid! Enter a password');
             return;
         }
-        else{
-            setError(null)
+        setError(null);
+
+        // login API
+
+        try {
+            const response = await axiosInstance.post('/api/users/login',{
+                 username: username,
+                 password: password
+            });
+
+            if (response.data && response.data.accessToken){
+                localStorage.setItem('token', response.data.accessToken);
+                navigate('/home')
+            }
+            }
+            catch(error){
+                if(error.response && error.response.data && error.response.data.message){
+                    setError(error.response.data.message);
+                }
+                else{
+                    setError('An Unexpected error occured');
+                }
         }
+        
     }
 
     const handleUsernameChange = (e) => {
